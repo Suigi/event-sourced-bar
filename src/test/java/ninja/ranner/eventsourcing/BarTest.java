@@ -1,5 +1,6 @@
 package ninja.ranner.eventsourcing;
 
+import ninja.ranner.eventsourcing.BarEvent.DrinkOrdered;
 import ninja.ranner.eventsourcing.BarEvent.TenantAgeVerified;
 import ninja.ranner.eventsourcing.BarEvent.TenantEntered;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +53,18 @@ class BarTest {
             assertThat(bar.isAllowedToOrderDrinks("Anna"))
                     .isTrue();
         }
+
+        @Test
+        void tenantOrdersDrinkThenPriceIsAddedToTheirTab() {
+            var bar = new Bar();
+            bar.enter("Bill");
+            bar.tenantShowsId("Bill", 36);
+
+            bar.orderDrink("Bill", "Cuba Libre", 12.50);
+
+            assertThat(bar.tabTotal("Bill"))
+                    .isEqualTo(12.50);
+        }
     }
 
     @Nested
@@ -76,6 +89,19 @@ class BarTest {
             assertThat(bar.uncommitedEvents())
                     .containsExactly(new TenantAgeVerified("Cho", 56));
         }
+
+        @Test
+        void tenantOrderingDringEnqueuesDrinkOrderedEvent() {
+            var bar = Bar.rebuild(List.of(
+                    new TenantEntered("Cho"),
+                    new TenantAgeVerified("Cho", 56)));
+
+            bar.orderDrink("Cho", "White Russian", 15.90);
+
+            assertThat(bar.uncommitedEvents())
+                    .containsExactly(new DrinkOrdered("Cho", "White Russian", 15.90));
+        }
+
     }
 
     @Nested

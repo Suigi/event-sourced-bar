@@ -21,9 +21,10 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
             case BarEvent.TenantLeft(String tenantName) -> tenants
                     .remove(tenantName);
 
-            // The bar can ignore the TenantAgeVerified event,
-            // because the Tenant entity handles it.
-            case BarEvent.TenantAgeVerified _ -> {}
+            // The bar can ignore the TenantAgeVerified and DrinkOrdered events,
+            // because the Tenant entity handles them.
+            case BarEvent.TenantAgeVerified _,
+                 BarEvent.DrinkOrdered _ -> {}
         }
 
     }
@@ -39,7 +40,11 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
     }
 
     public void tenantShowsId(String tenantName, int age) {
-        tenants.get(tenantName).showsId(age);
+        tenants.get(tenantName).showId(age);
+    }
+
+    public void orderDrink(String tenantName, String drinkName, double price) {
+        tenants.get(tenantName).orderDrink(drinkName, price);
     }
 
     // Queries
@@ -52,37 +57,60 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
         return tenants.get(tenantName).isAllowedToOrderDrinks();
     }
 
+    public double tabTotal(String tenantName) {
+        return tenants.get(tenantName).tabTotal();
+    }
+
     static class Tenant extends Entity<BarEvent> {
         private final String name;
         private Integer age;
+        private double tabTotal = 0;
 
         Tenant(String name, Bar bar) {
             super(bar::enqueue);
             this.name = name;
         }
 
-        private boolean isAllowedToOrderDrinks() {
-            return age >= 21;
-        }
-
-        public String name() {
-            return name;
-        }
-
         @Override
         protected void apply(BarEvent barEvent) {
             switch (barEvent) {
-                case BarEvent.TenantEntered _, BarEvent.TenantLeft _ -> {}
+                case BarEvent.TenantEntered _, BarEvent.TenantLeft _ -> {
+                }
                 case BarEvent.TenantAgeVerified(String tenantName, int tenantAge) -> {
                     if (tenantName.equals(name)) {
                         this.age = tenantAge;
                     }
                 }
+                case BarEvent.DrinkOrdered(String tenantName, _, double price) -> {
+                    if (tenantName.equals(name) && isAllowedToOrderDrinks()) {
+                        this.tabTotal += price;
+                    }
+                }
             }
         }
 
-        public void showsId(int age) {
+        // Commands
+
+        public void showId(int age) {
             enqueue(new BarEvent.TenantAgeVerified(name, age));
+        }
+
+        public void orderDrink(String drinkName, double price) {
+            enqueue(new BarEvent.DrinkOrdered(name, drinkName, price));
+        }
+
+        // Queries
+
+        public String name() {
+            return name;
+        }
+
+        private boolean isAllowedToOrderDrinks() {
+            return age >= 21;
+        }
+
+        public double tabTotal() {
+            return tabTotal;
         }
     }
 }

@@ -1,13 +1,16 @@
 package ninja.ranner.eventsourcing;
 
 public sealed interface BarEvent permits
+        BarEvent.DrinkOrdered,
         BarEvent.TenantAgeVerified,
         BarEvent.TenantEntered,
         BarEvent.TenantLeft {
 
-    record TenantEntered(String name) implements BarEvent {}
+    record TenantEntered(String tenantName) implements BarEvent {}
 
-    record TenantLeft(String name) implements BarEvent {}
+    record TenantLeft(String tenantName) implements BarEvent {}
 
-    record TenantAgeVerified(String name, int age) implements BarEvent {}
+    record TenantAgeVerified(String tenantName, int age) implements BarEvent {}
+
+    record DrinkOrdered(String tenantName, String drinkName, double price) implements BarEvent {}
 }
