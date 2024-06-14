@@ -14,6 +14,10 @@ import java.util.function.Function;
 public class MenuService {
     private final HashMap<String, MenuItem> items;
 
+    public MenuService() {
+        this(null);
+    }
+
     public MenuService(HashMap<String, MenuItem> items) {
         this.items = items;
     }
@@ -23,6 +27,9 @@ public class MenuService {
     }
 
     public Optional<MenuItem> find(String itemName) {
+        if (items == null) {
+            throw new UnsupportedOperationException("Production use-case is not implemented");
+        }
         return Optional.ofNullable(items.get(itemName));
     }
 
