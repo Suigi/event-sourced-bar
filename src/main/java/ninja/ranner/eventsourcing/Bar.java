@@ -82,7 +82,7 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
                     }
                 }
                 case BarEvent.DrinkOrdered(String tenantName, _, double price) -> {
-                    if (tenantName.equals(name) && isAllowedToOrderDrinks()) {
+                    if (tenantName.equals(name)) {
                         this.tabTotal += price;
                     }
                 }
@@ -96,7 +96,22 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
         }
 
         public void orderDrink(String drinkName, double price) {
+            ensureIsWasShown();
+            ensureDrinkingAge();
+
             enqueue(new BarEvent.DrinkOrdered(name, drinkName, price));
+        }
+
+        private void ensureDrinkingAge() {
+            if (!isAllowedToOrderDrinks()) {
+                throw new IllegalStateException("%s (%d) cannot order drinks. Must be 21 or older.".formatted(name, age));
+            }
+        }
+
+        private void ensureIsWasShown() {
+            if (age == null) {
+                throw new IllegalStateException("%s cannot order drinks. Age not verified.".formatted(name));
+            }
         }
 
         // Queries
@@ -106,7 +121,7 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
         }
 
         private boolean isAllowedToOrderDrinks() {
-            return age >= 21;
+            return age != null && age >= 21;
         }
 
         public double tabTotal() {

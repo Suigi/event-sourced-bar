@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class BarTest {
 
@@ -64,6 +65,27 @@ class BarTest {
 
             assertThat(bar.tabTotal("Bill"))
                     .isEqualTo(12.50);
+        }
+
+        @Test
+        void tenantWithoutIdCannotOrderDrink() {
+            var bar = new Bar();
+            bar.enter("Lisa");
+
+            assertThatIllegalStateException()
+                    .isThrownBy(() -> bar.orderDrink("Lisa", "Rum", 12.50))
+                    .withMessage("Lisa cannot order drinks. Age not verified.");
+        }
+
+        @Test
+        void youngTenantCannotOrderDrink() {
+            var bar = new Bar();
+            bar.enter("Tom");
+            bar.tenantShowsId("Tom", 18);
+
+            assertThatIllegalStateException()
+                    .isThrownBy(() -> bar.orderDrink("Tom", "Rum", 12.50))
+                    .withMessage("Tom (18) cannot order drinks. Must be 21 or older.");
         }
     }
 
