@@ -57,11 +57,11 @@ class BarTest {
 
         @Test
         void tenantOrdersDrinkThenPriceIsAddedToTheirTab() {
-            var bar = new Bar();
+            var bar = Bar.configureForTest(c -> c.addMenuItem("Cuba Libre", 12.50));
             bar.enter("Bill");
             bar.tenantShowsId("Bill", 36);
 
-            bar.orderDrink("Bill", "Cuba Libre", 12.50);
+            bar.orderDrink("Bill", "Cuba Libre");
 
             assertThat(bar.tabTotal("Bill"))
                     .isEqualTo(12.50);
@@ -69,22 +69,22 @@ class BarTest {
 
         @Test
         void tenantWithoutIdCannotOrderDrink() {
-            var bar = new Bar();
+            var bar = Bar.configureForTest(c -> c.addMenuItem("Rum", 9.90));
             bar.enter("Lisa");
 
             assertThatIllegalStateException()
-                    .isThrownBy(() -> bar.orderDrink("Lisa", "Rum", 12.50))
+                    .isThrownBy(() -> bar.orderDrink("Lisa", "Rum"))
                     .withMessage("Lisa cannot order drinks. Age not verified.");
         }
 
         @Test
         void youngTenantCannotOrderDrink() {
-            var bar = new Bar();
+            var bar = Bar.configureForTest();
             bar.enter("Tom");
             bar.tenantShowsId("Tom", 18);
 
             assertThatIllegalStateException()
-                    .isThrownBy(() -> bar.orderDrink("Tom", "Rum", 12.50))
+                    .isThrownBy(() -> bar.orderDrink("Tom", "Rum"))
                     .withMessage("Tom (18) cannot order drinks. Must be 21 or older.");
         }
     }
@@ -113,12 +113,14 @@ class BarTest {
         }
 
         @Test
-        void tenantOrderingDringEnqueuesDrinkOrderedEvent() {
-            var bar = Bar.rebuild(List.of(
-                    new TenantEntered("Cho"),
-                    new TenantAgeVerified("Cho", 56)));
+        void tenantOrderingDrinkEnqueuesDrinkOrderedEvent() {
+            var bar = Bar.configureForTest(c -> c
+                    .rebuildFrom(
+                            new TenantEntered("Cho"),
+                            new TenantAgeVerified("Cho", 56))
+                    .addMenuItem("White Russian", 15.90));
 
-            bar.orderDrink("Cho", "White Russian", 15.90);
+            bar.orderDrink("Cho", "White Russian");
 
             assertThat(bar.uncommitedEvents())
                     .containsExactly(new DrinkOrdered("Cho", "White Russian", 15.90));

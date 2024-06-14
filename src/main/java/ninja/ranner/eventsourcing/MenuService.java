@@ -23,14 +23,22 @@ public class MenuService {
     }
 
     public static MenuService configureForTest(Function<Config, Config> configure) {
-        return new MenuService(configure.apply(new Config()).allItems);
+        return configureForTest(configure.apply(new Config()));
     }
 
-    public Optional<MenuItem> find(String itemName) {
+    public static MenuService configureForTest(Config config) {
+        return new MenuService(config.allItems);
+    }
+
+    public MenuItem find(String itemName) {
         if (items == null) {
             throw new UnsupportedOperationException("Production use-case is not implemented");
         }
-        return Optional.ofNullable(items.get(itemName));
+        MenuItem menuItem = items.get(itemName);
+        if (menuItem == null) {
+            return new MenuItem(itemName, 42);
+        }
+        return menuItem;
     }
 
     public static class Config {

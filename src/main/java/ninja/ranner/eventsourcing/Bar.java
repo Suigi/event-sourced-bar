@@ -1,15 +1,55 @@
 package ninja.ranner.eventsourcing;
 
 import java.util.*;
+import java.util.List;
+import java.util.function.Function;
 
 public class Bar extends EventSourcedAggregate<BarEvent> {
 
     private final Map<String, Tenant> tenants = new HashMap<>();
+    private final MenuService menuService;
+
+    public Bar() {
+        this(new MenuService());
+    }
+
+    private Bar(MenuService menuService) {
+        this.menuService = menuService;
+    }
 
     public static Bar rebuild(List<BarEvent> events) {
         var bar = new Bar();
+        return rebuild(bar, events);
+    }
+
+    private static Bar rebuild(Bar bar, List<BarEvent> events) {
         events.forEach(bar::rootApply);
         return bar;
+    }
+
+    public static Bar configureForTest(Function<Config, Config> configure) {
+        Config config = configure.apply(new Config());
+        Bar bar = new Bar(MenuService.configureForTest(config.menuItemConfig));
+        return rebuild(bar, config.events);
+    }
+
+    public static Bar configureForTest() {
+        return configureForTest(Function.identity());
+    }
+
+    public static class Config {
+        private final MenuService.Config menuItemConfig = new MenuService.Config();
+        private final List<BarEvent> events = new ArrayList<>();
+
+        public Config addMenuItem(String itemName, double itemPrice) {
+            menuItemConfig.add(itemName, itemPrice);
+            return this;
+        }
+
+        public Config rebuildFrom(BarEvent... events) {
+            this.events.addAll(Arrays.stream(events).toList());
+            return this;
+        }
     }
 
     @Override
@@ -24,7 +64,8 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
             // The bar can ignore the TenantAgeVerified and DrinkOrdered events,
             // because the Tenant entity handles them.
             case BarEvent.TenantAgeVerified _,
-                 BarEvent.DrinkOrdered _ -> {}
+                 BarEvent.DrinkOrdered _ -> {
+            }
         }
 
     }
@@ -43,8 +84,8 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
         tenants.get(tenantName).showId(age);
     }
 
-    public void orderDrink(String tenantName, String drinkName, double price) {
-        tenants.get(tenantName).orderDrink(drinkName, price);
+    public void orderDrink(String tenantName, String drinkName) {
+        tenants.get(tenantName).orderDrink(drinkName, menuService.find(drinkName).price());
     }
 
     // Queries

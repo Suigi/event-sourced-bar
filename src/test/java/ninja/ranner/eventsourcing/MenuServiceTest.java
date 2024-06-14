@@ -12,7 +12,7 @@ class MenuServiceTest {
         MenuService menuService = MenuService.configureForTest(c -> c.add("Pizza", 7.99));
 
         assertThat(menuService.find("Pizza"))
-                .contains(new MenuService.MenuItem("Pizza", 7.99));
+                .isEqualTo(new MenuService.MenuItem("Pizza", 7.99));
     }
 
     @Test
