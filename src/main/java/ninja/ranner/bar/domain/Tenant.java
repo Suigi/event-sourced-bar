@@ -1,8 +1,8 @@
 package ninja.ranner.bar.domain;
 
-import ninja.ranner.bar.eventsourcing.EventSourcedAggregate;
+import ninja.ranner.bar.eventsourcing.NestedEntity;
 
-class Tenant extends EventSourcedAggregate.Entity<BarEvent> {
+class Tenant extends NestedEntity<BarEvent> {
     private final String name;
     private Integer age;
     private double tabTotal = 0;
