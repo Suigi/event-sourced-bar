@@ -1,4 +1,7 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.domain;
+
+import ninja.ranner.bar.eventsourcing.EventSourcedAggregate;
+import ninja.ranner.bar.infrastructure.MenuService;
 
 import java.util.*;
 import java.util.List;

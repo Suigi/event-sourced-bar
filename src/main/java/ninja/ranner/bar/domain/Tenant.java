@@ -1,4 +1,6 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.domain;
+
+import ninja.ranner.bar.eventsourcing.EventSourcedAggregate;
 
 class Tenant extends EventSourcedAggregate.Entity<BarEvent> {
     private final String name;

@@ -1,4 +1,4 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.eventsourcing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ public abstract class EventSourcedAggregate<EVENT> {
 
     protected abstract void apply(EVENT event);
 
-    protected void enqueue(EVENT event) {
+    public void enqueue(EVENT event) {
         rootApply(event);
         uncommitedEvents.add(event);
     }
@@ -30,7 +30,7 @@ public abstract class EventSourcedAggregate<EVENT> {
         return uncommitedEvents;
     }
 
-    protected static abstract class Entity<EVENT> {
+    public static abstract class Entity<EVENT> {
 
         private final Consumer<EVENT> rootEnqueue;
 

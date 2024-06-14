@@ -1,8 +1,8 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.domain;
 
-import ninja.ranner.eventsourcing.BarEvent.DrinkOrdered;
-import ninja.ranner.eventsourcing.BarEvent.TenantAgeVerified;
-import ninja.ranner.eventsourcing.BarEvent.TenantEntered;
+import ninja.ranner.bar.domain.BarEvent.DrinkOrdered;
+import ninja.ranner.bar.domain.BarEvent.TenantAgeVerified;
+import ninja.ranner.bar.domain.BarEvent.TenantEntered;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,8 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.infrastructure;
+
+import ninja.ranner.bar.domain.Bar;
 
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**

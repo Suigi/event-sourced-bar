@@ -1,4 +1,4 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.domain;
 
 public sealed interface BarEvent permits
         BarEvent.DrinkOrdered,

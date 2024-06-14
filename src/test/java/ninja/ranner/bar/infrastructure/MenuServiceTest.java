@@ -1,4 +1,4 @@
-package ninja.ranner.eventsourcing;
+package ninja.ranner.bar.infrastructure;
 
 import org.junit.jupiter.api.Test;
 
