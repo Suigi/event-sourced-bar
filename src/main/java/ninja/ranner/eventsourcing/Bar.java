@@ -9,12 +9,10 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
     private final Map<String, Tenant> tenants = new HashMap<>();
     private final MenuService menuService;
 
+    // "Production" constructors
+
     public Bar() {
         this(new MenuService());
-    }
-
-    private Bar(MenuService menuService) {
-        this.menuService = menuService;
     }
 
     public static Bar rebuild(List<BarEvent> events) {
@@ -22,34 +20,15 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
         return rebuild(bar, events);
     }
 
+    // "Configure for test" constructors
+
+    private Bar(MenuService menuService) {
+        this.menuService = menuService;
+    }
+
     private static Bar rebuild(Bar bar, List<BarEvent> events) {
         events.forEach(bar::rootApply);
         return bar;
-    }
-
-    public static Bar configureForTest(Function<Config, Config> configure) {
-        Config config = configure.apply(new Config());
-        Bar bar = new Bar(MenuService.configureForTest(config.menuItemConfig));
-        return rebuild(bar, config.events);
-    }
-
-    public static Bar configureForTest() {
-        return configureForTest(Function.identity());
-    }
-
-    public static class Config {
-        private final MenuService.Config menuItemConfig = new MenuService.Config();
-        private final List<BarEvent> events = new ArrayList<>();
-
-        public Config addMenuItem(String itemName, double itemPrice) {
-            menuItemConfig.add(itemName, itemPrice);
-            return this;
-        }
-
-        public Config rebuildFrom(BarEvent... events) {
-            this.events.addAll(Arrays.stream(events).toList());
-            return this;
-        }
     }
 
     @Override
@@ -102,71 +81,31 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
         return tenants.get(tenantName).tabTotal();
     }
 
-    static class Tenant extends Entity<BarEvent> {
-        private final String name;
-        private Integer age;
-        private double tabTotal = 0;
+    // Configurable Responses
 
-        Tenant(String name, Bar bar) {
-            super(bar::enqueue);
-            this.name = name;
+    public static Bar configureForTest(Function<Config, Config> configure) {
+        Config config = configure.apply(new Config());
+        Bar bar = new Bar(MenuService.configureForTest(config.menuItemConfig));
+        return rebuild(bar, config.events);
+    }
+
+    public static Bar configureForTest() {
+        return configureForTest(Function.identity());
+    }
+
+    public static class Config {
+        private final MenuService.Config menuItemConfig = new MenuService.Config();
+        private final List<BarEvent> events = new ArrayList<>();
+
+        public Config addMenuItem(String itemName, double itemPrice) {
+            menuItemConfig.add(itemName, itemPrice);
+            return this;
         }
 
-        @Override
-        protected void apply(BarEvent barEvent) {
-            switch (barEvent) {
-                case BarEvent.TenantEntered _, BarEvent.TenantLeft _ -> {
-                }
-                case BarEvent.TenantAgeVerified(String tenantName, int tenantAge) -> {
-                    if (tenantName.equals(name)) {
-                        this.age = tenantAge;
-                    }
-                }
-                case BarEvent.DrinkOrdered(String tenantName, _, double price) -> {
-                    if (tenantName.equals(name)) {
-                        this.tabTotal += price;
-                    }
-                }
-            }
-        }
-
-        // Commands
-
-        public void showId(int age) {
-            enqueue(new BarEvent.TenantAgeVerified(name, age));
-        }
-
-        public void orderDrink(String drinkName, double price) {
-            ensureIsWasShown();
-            ensureDrinkingAge();
-
-            enqueue(new BarEvent.DrinkOrdered(name, drinkName, price));
-        }
-
-        private void ensureDrinkingAge() {
-            if (!isAllowedToOrderDrinks()) {
-                throw new IllegalStateException("%s (%d) cannot order drinks. Must be 21 or older.".formatted(name, age));
-            }
-        }
-
-        private void ensureIsWasShown() {
-            if (age == null) {
-                throw new IllegalStateException("%s cannot order drinks. Age not verified.".formatted(name));
-            }
-        }
-
-        // Queries
-
-        public String name() {
-            return name;
-        }
-
-        private boolean isAllowedToOrderDrinks() {
-            return age != null && age >= 21;
-        }
-
-        public double tabTotal() {
-            return tabTotal;
+        public Config rebuildFrom(BarEvent... events) {
+            this.events.addAll(Arrays.stream(events).toList());
+            return this;
         }
     }
+
 }
