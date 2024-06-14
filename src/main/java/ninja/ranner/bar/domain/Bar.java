@@ -19,19 +19,18 @@ public class Bar extends EventSourcedAggregate<BarEvent> {
     }
 
     public static Bar rebuild(List<BarEvent> events) {
-        var bar = new Bar();
-        return rebuild(bar, events);
+        return rebuild(new Bar(), events);
+    }
+
+    private static Bar rebuild(Bar bar, List<BarEvent> events) {
+        events.forEach(bar::rootApply);
+        return bar;
     }
 
     // "Configure for test" constructors
 
     private Bar(MenuService menuService) {
         this.menuService = menuService;
-    }
-
-    private static Bar rebuild(Bar bar, List<BarEvent> events) {
-        events.forEach(bar::rootApply);
-        return bar;
     }
 
     @Override

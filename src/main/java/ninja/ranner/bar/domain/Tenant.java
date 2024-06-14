@@ -15,8 +15,6 @@ class Tenant extends NestedEntity<BarEvent> {
     @Override
     protected void apply(BarEvent barEvent) {
         switch (barEvent) {
-            case BarEvent.TenantEntered _, BarEvent.TenantLeft _ -> {
-            }
             case BarEvent.TenantAgeVerified(String tenantName, int tenantAge) -> {
                 if (tenantName.equals(name)) {
                     this.age = tenantAge;
@@ -27,6 +25,9 @@ class Tenant extends NestedEntity<BarEvent> {
                     this.tabTotal += price;
                 }
             }
+
+            // We don't care about these events.
+            case BarEvent.TenantEntered _, BarEvent.TenantLeft _ -> {}
         }
     }
 
