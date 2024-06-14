@@ -38,7 +38,7 @@ class Tenant extends NestedEntity<BarEvent> {
     }
 
     public void orderDrink(String drinkName, double price) {
-        ensureIsWasShown();
+        ensureIdWasShown();
         ensureDrinkingAge();
 
         enqueue(new BarEvent.DrinkOrdered(name, drinkName, price));
@@ -50,7 +50,7 @@ class Tenant extends NestedEntity<BarEvent> {
         }
     }
 
-    private void ensureIsWasShown() {
+    private void ensureIdWasShown() {
         if (age == null) {
             throw new IllegalStateException("%s cannot order drinks. Age not verified.".formatted(name));
         }
