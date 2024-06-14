@@ -4,7 +4,9 @@ import java.util.function.Consumer;
 
 /**
  * Represents a nested Entity of an event-sourced Aggregate.
- * All events are enqueued to the root Aggregate.
+ *
+ * <p>All events are enqueued to the root Aggregate.</p>
+ *
  * @param <EVENT>
  */
 public abstract class NestedEntity<EVENT> {

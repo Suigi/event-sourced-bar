@@ -6,8 +6,10 @@ import java.util.List;
 /**
  * Represents the Aggregate Root of an event-source Aggregate.
  *
+ * <p>
  * Keeps a list of nested Entities. The nested Entities receive all applied Events
  * and are allowed to enqueue new Events through the root.
+ * </p>
  *
  * @param <EVENT> the type of events that this Aggregate is persisted by.
  */
